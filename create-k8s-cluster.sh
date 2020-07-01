@@ -41,22 +41,15 @@ install_db () {
         --timeout=600s \
         -l "app.kubernetes.io/instance=cluster1" \
         --namespace percona
-
-    echo "Fetching DB password"
-    export DB_PASS=$(kubectl get secret my-cluster-secrets -n percona -o go-template='{{ .data.root }}' | base64 -D)
-    echo "DB password: $DB_PASS"
-
-    sleep 5   # not exact science so re-run if issues
-    load_test_data
 }
 
 load_test_data () {
     # just for demo (this is not secure to transmit pass!!!)
+    echo "Fetching DB password"
+    export DB_PASS=$(kubectl get secret my-cluster-secrets -n percona -o go-template='{{ .data.root }}' | base64 -D)
+    echo "DB password: $DB_PASS"
+
     echo "Loading test data into database ..."
-    kubectl wait --for=condition=ready pod \
-        --timeout=600s \
-        -l "statefulset.kubernetes.io/pod-name=cluster1-pxc-0" \
-        --namespace percona
     kubectl -n percona exec -i cluster1-pxc-0 -c pxc -- mysql -uroot -p${DB_PASS} < database-test1.sql
 }
 
@@ -160,6 +153,10 @@ create_internal_lb
 # create serverless vpc
 echo "Creating VPC connector ..."
 create_vpc_connector
+
+# deploy cloud function
+echo "Loading test data into database ..."
+load_test_data
 
 # deploy cloud function
 echo "Deploying cloud function ..."
