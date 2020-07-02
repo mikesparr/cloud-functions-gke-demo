@@ -3,10 +3,10 @@ import mysql.connector
 from mysql.connector import errorcode
 
 config = {
-  'user': 'root',
+  'user': 'root', # demo purely for GKE connectivity example - don't use root
   'password': os.environ['DB_PASS'],
   'host': os.environ['DB_HOST'],
-  'database': 'test1',
+  'database': 'test1', # may want to parameterize this too
   'raise_on_warnings': True
 }
 
